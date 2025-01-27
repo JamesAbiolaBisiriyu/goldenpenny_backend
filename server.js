@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-const http = require('http');
+import { connectdb } from "./config/db.js"
 
 
 
@@ -13,17 +13,20 @@ const port = 4000
 //middleware
 app.use(express.json())
 app.use(cors())
+//db connection
+connectdb();
 
-app.get("/",(req, req)=>{
-  resizeBy.send("API Working")
+app.get("/",(req, res)=>{
+  res.send("API Working")
+})
+
+
+app.listen(port, ()=>{
+  console.log(`Server started on http://localhost:${port}`);
+  
 })
 
 
 
 
-
-
-// http.createServer((req, res)=>{
-// console.log('A new request recieved');
-
-// });
+//mongodb+srv://emperor2g:<db_password>@cluster0.dacbl.mongodb.net/?
