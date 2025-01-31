@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from 'mongoose';
 
 
 const foodSchema = new mongoose.Schema({
@@ -9,6 +9,6 @@ const foodSchema = new mongoose.Schema({
   category: {type:String,required:true},
 })
 
-const foodModel = Mongoose.models.food || mongoose.model("food", foodSchema)
+const FoodModel = mongoose.models.food || mongoose.model("food", foodSchema)
 
-export default foodModel;
+export default FoodModel;

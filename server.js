@@ -33,4 +33,4 @@ app.listen(port, ()=>{
 
 
 
-//mongodb+srv://emperor2g:<db_password>@cluster0.dacbl.mongodb.net/?
+//mongodb+srv://emperor2g:Godchild1982@cluster0.dacbl.mongodb.net/?
