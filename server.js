@@ -48,11 +48,11 @@
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const { connectdb } = require("./config/db");
 const foodRouter = require("./routes/foodRoute");
+const userRouter = require("./routes/userRoutes"); // Fixed import
+require("dotenv/config"); // Ensure dotenv is loaded properly
 
-// App Config
 const app = express();
 const port = 4000;
 
@@ -60,13 +60,13 @@ const port = 4000;
 app.use(express.json());
 app.use(cors());
 
-app.use("/images", express.static("uploads"));
-
 // DB Connection
 connectdb();
 
 // API Endpoints
 app.use("/api/food", foodRouter);
+app.use("/api/user", userRouter); // Ensure this is correct
+app.use("/images", express.static("uploads"));
 
 app.get("/", (req, res) => {
   res.send("API Working");
