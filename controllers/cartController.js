@@ -1,9 +1,12 @@
 
 const userModel = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+
 
 // Add items to user cart
 const addToCart = async (req, res) => {
   try {
+    console.log("Auth header (addToCart):", req.headers.authorization);
     const userData = await userModel.findById(req.user._id);
 
     if (!userData) {
@@ -31,41 +34,64 @@ const addToCart = async (req, res) => {
   }
 };
 
-// Remove item from cart
+
+
 const removeFromCart = async (req, res) => {
   try {
-    const userData = await userModel.findOne({ _id: req.body.userId });
+    console.log("Auth header (removeFromCart):", req.headers.authorization);
+    console.log("Received request body:", req.body);
 
-    if (!userData || !userData.cartData || !userData.cartData[req.body.itemId]) {
-      return res.status(404).json({ success: false, message: "Item not found in cart" });
+    let userData = await userModel.findById(req.user._id);
+
+
+    if (!userData) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    delete userData.cartData[req.body.itemId];
+    let cartData = userData.cartData || {};
 
-    await userModel.findByIdAndUpdate(req.body.userId, { cartData: userData.cartData });
+    if (cartData[req.body.itemId] && cartData[req.body.itemId] > 0) {
+      cartData[req.body.itemId] -= 1;
+      if (cartData[req.body.itemId] === 0) {
+        delete cartData[req.body.itemId]; // Remove item if quantity reaches 0
+      }
+    } else {
+      return res.status(400).json({ success: false, message: "Item not in cart" });
+    }
 
-    res.json({ success: true, message: "Item removed from cart" });
+    await userModel.findByIdAndUpdate(req.user._id, { cartData });
+
+
+    res.json({ success: true, message: "Removed from Cart" });
   } catch (error) {
     console.error("Error in removeFromCart:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
-// Fetch user cart
+
+
+const JWT_SECRET = 'random#secret'; // same key used to sign the token
+
 const getCart = async (req, res) => {
   try {
-    const userData = await userModel.findOne({ _id: req.body.userId });
+    console.log("Auth header (getCart):", req.headers.authorization);
+    const token = req.headers.authorization?.split(' ')[1]; // Expecting: Bearer <token>
+    if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
 
-    if (!userData) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.id;
 
-    res.json({ success: true, cart: userData.cartData || {} });
+    const userData = await userModel.findById(userId);
+    const cartData = userData.cartData;
+
+    res.json({ success: true, cartData });
   } catch (error) {
-    console.error("Error in getCart:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.log(error);
+    res.status(500).json({ success: false, message: 'error' });
   }
 };
+
 
 
 module.exports = { addToCart, removeFromCart, getCart };
